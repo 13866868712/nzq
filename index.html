@@ -3,67 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>智能农场产值计算器 - 24块地 | 支持百分比换算</title>
+    <title>智能农场产值计算器 - 单/双作物模式</title>
     <style>
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-
         body {
             background: #eef3e6;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Helvetica, 'Noto Sans', sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 20px 16px 40px;
             color: #1e2f1c;
         }
-
         .container {
-            max-width: 550px;
+            max-width: 650px;
             margin: 0 auto;
         }
-
         .card {
             background: white;
             border-radius: 32px;
-            padding: 20px 18px;
+            padding: 20px 16px;
             margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border: 1px solid #d9e8cf;
         }
-
         .card-title {
-            font-size: 1.55rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin: 0 0 8px 0;
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
             color: #2b5e2b;
         }
-
-        .card-title span {
+        .badge {
             background: #e9f5e3;
             padding: 4px 12px;
             border-radius: 40px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: normal;
-            color: #3c7e3c;
         }
-
-        .sub {
-            font-size: 0.85rem;
-            color: #5f7a56;
+        .mode-switch {
+            background: #eef3e9;
+            border-radius: 60px;
+            padding: 6px;
+            display: inline-flex;
             margin-bottom: 20px;
-            border-left: 3px solid #9bc48b;
-            padding-left: 12px;
+            width: 100%;
         }
-
+        .mode-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: transparent;
+            color: #4a6b3f;
+        }
+        .mode-btn.active {
+            background: #2d5a2c;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
         .info-badge {
             background: #eef3e9;
             padding: 10px 14px;
             border-radius: 28px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 18px;
             display: flex;
             justify-content: space-between;
@@ -71,643 +81,778 @@
             gap: 8px;
             font-weight: 500;
         }
-
-        .input-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
+        .yield-settings {
+            background: #f3f8ef;
+            border-radius: 28px;
+            padding: 14px;
             margin-bottom: 20px;
-            gap: 8px;
         }
-
-        .input-label {
-            width: 120px;
-            font-weight: 600;
-            font-size: 1rem;
-            color: #2c4427;
-        }
-
-        .input-number-group {
-            flex: 1;
-            min-width: 130px;
-            background: #f9fef6;
-            border-radius: 40px;
-            border: 1px solid #cde0c0;
-            overflow: hidden;
-        }
-
-        .input-number-group input {
-            width: 100%;
-            padding: 12px 12px;
-            border: none;
-            font-size: 1rem;
-            background: transparent;
-            text-align: center;
-            font-weight: 500;
-            outline: none;
-        }
-
-        .auto-value {
-            background: #eef1ea;
-            padding: 10px 14px;
-            border-radius: 28px;
-            font-size: 0.9rem;
-            color: #2b4b25;
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .var-grid {
-            background: #fafef7;
-            border-radius: 28px;
-            padding: 12px 12px 4px 12px;
-            margin-top: 12px;
-            margin-bottom: 8px;
-        }
-
-        .var-item {
+        .yield-row {
             display: flex;
             flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+        }
+        .yield-item {
+            flex: 1;
+            background: white;
+            border-radius: 28px;
+            padding: 8px 12px;
+            display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
             gap: 8px;
+            border: 1px solid #d4e2ca;
         }
-
-        .var-name {
-            flex: 2;
-            font-size: 0.9rem;
+        .yield-label {
             font-weight: 600;
-            background: #eef5ea;
-            padding: 6px 10px;
-            border-radius: 30px;
-            text-align: center;
-            min-width: 90px;
+            font-size: 0.85rem;
         }
-
-        .var-input {
-            flex: 3;
-            min-width: 100px;
-            background: white;
-            border-radius: 30px;
-            border: 1px solid #d0dfc5;
+        .yield-input {
             display: flex;
             align-items: center;
+            gap: 4px;
+            background: #f9fef6;
+            border-radius: 40px;
+            padding: 4px 10px;
         }
-
-        .var-input input {
-            width: 100%;
-            padding: 10px 10px;
+        .yield-input input {
+            width: 65px;
+            padding: 6px 4px;
             border: none;
             text-align: center;
-            font-size: 0.95rem;
+            font-weight: 600;
             background: transparent;
-            border-radius: 30px;
-            font-weight: 500;
             outline: none;
         }
-
         .price-area {
             background: #dfedd6;
             border-radius: 28px;
-            padding: 16px 18px;
+            padding: 16px;
             margin-bottom: 24px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 16px;
         }
-
-        .price-label {
-            font-weight: 700;
-            font-size: 1.1rem;
+        .price-item {
+            flex: 1;
+            background: rgba(255,255,240,0.7);
+            border-radius: 40px;
+            padding: 8px 12px;
+            text-align: center;
         }
-
         .price-input {
             background: white;
             border-radius: 48px;
-            border: 1px solid #cbdcc0;
             display: inline-flex;
             align-items: center;
             padding: 0 12px;
         }
-
         .price-input input {
-            width: 130px;
-            padding: 12px 8px;
+            width: 100px;
+            padding: 10px 6px;
             border: none;
-            font-size: 1.1rem;
+            text-align: center;
             font-weight: 600;
-            text-align: right;
             outline: none;
             background: transparent;
         }
-
-        .price-unit {
-            margin-left: 5px;
-            font-weight: 500;
-            color: #4f6b44;
+        .crop-section {
+            background: #fafef5;
+            border-radius: 28px;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #e0efd4;
         }
-
+        .crop-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .crop-badge-a { background: #cfe3c3; color: #2f6b2a; padding: 4px 14px; border-radius: 30px; font-weight: 700; }
+        .crop-badge-b { background: #f3e0c2; color: #a5671a; padding: 4px 14px; border-radius: 30px; font-weight: 700; }
+        .crop-count-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 40px;
+            border: 1px solid #cde0c0;
+            padding: 4px 12px;
+        }
+        .crop-count-input input {
+            width: 70px;
+            padding: 8px 4px;
+            border: none;
+            text-align: center;
+            font-weight: 600;
+            background: transparent;
+            outline: none;
+        }
+        /* 变异网格：3列布局 */
+        .var-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .var-item {
+            background: white;
+            border-radius: 40px;
+            border: 1px solid #dbe8d0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+        }
+        .var-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .var-input input {
+            width: 50px;
+            padding: 6px 2px;
+            border: none;
+            text-align: center;
+            background: transparent;
+            outline: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        .stat-light {
+            background: #eef1e4;
+            border-radius: 28px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            margin: 10px 0 5px;
+            text-align: center;
+        }
         .result-box {
             background: #2d4528;
             border-radius: 36px;
             padding: 20px;
             margin: 16px 0 24px;
             text-align: center;
-            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.1);
         }
-
         .total-value {
-            font-size: 2.6rem;
+            font-size: 2.2rem;
             font-weight: 800;
             color: #f9f3c1;
-            letter-spacing: 2px;
-            word-break: break-word;
         }
-
-        .total-label {
-            color: #cbe5be;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-
         .percent-area {
             background: #3b5c34;
             border-radius: 40px;
-            padding: 16px 18px;
+            padding: 12px 16px;
             margin-top: 12px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 10px;
         }
-
-        .percent-label {
-            font-weight: 600;
-            color: #f2f9eb;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .percent-input-group {
-            background: #f9fef2;
-            border-radius: 48px;
-            display: inline-flex;
-            align-items: center;
-            padding: 0 12px;
-            border: 1px solid #afcd9c;
-        }
-
-        .percent-input-group input {
-            width: 100px;
-            padding: 10px 6px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 600;
-            text-align: right;
-            outline: none;
-            background: transparent;
-            color: #1d3a1a;
-        }
-
-        .percent-unit {
-            font-weight: 500;
-            color: #446e3a;
-            margin-left: 4px;
-        }
-
         .percent-result {
             background: #f5f9ef;
             border-radius: 40px;
-            padding: 10px 16px;
+            padding: 8px 14px;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #1a3a17;
-            text-align: center;
-            flex: 1;
-            min-width: 120px;
         }
-
         .detail-info {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             background: #254021;
             border-radius: 28px;
-            padding: 12px;
+            padding: 10px;
             margin-top: 10px;
             color: #e2f0da;
-            text-align: left;
         }
-
         .btn-reset {
             background: white;
             border: none;
-            padding: 14px 20px;
+            padding: 14px;
             border-radius: 60px;
             font-weight: 700;
             font-size: 1rem;
             color: #2d5a2c;
             width: 100%;
             cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-
-        .btn-reset:active {
-            transform: scale(0.97);
-            background: #f9fcf5;
-        }
-
         .footnote {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-align: center;
             color: #7c9970;
             margin-top: 20px;
         }
-
-        .stat-light {
-            background: #eef1e4;
-            border-radius: 28px;
-            padding: 8px 15px;
-            font-size: 0.85rem;
-            margin: 10px 0 5px;
-            text-align: center;
+        .hidden {
+            display: none;
         }
-
-        @media (max-width: 480px) {
-            .input-label {
-                width: 100px;
+        .info-text {
+            background: #eef3e9;
+            padding: 6px 12px;
+            border-radius: 28px;
+            font-size: 0.75rem;
+            margin-bottom: 12px;
+            text-align: center;
+            color: #4a6b3f;
+        }
+        @media (max-width: 500px) {
+            .var-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .var-item {
+                padding: 4px 6px;
+            }
+            .var-input input {
+                width: 45px;
             }
             .var-name {
-                font-size: 0.8rem;
-            }
-            .percent-result {
-                font-size: 1rem;
-                padding: 8px 12px;
+                font-size: 0.65rem;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 基础单价卡片 -->
-    <div class="price-area">
-        <div class="price-label">💰 基础单价 (元/产量单位)</div>
-        <div class="price-input">
-            <input type="number" id="basePrice" value="1.00" step="0.1" min="0">
-            <span class="price-unit">元</span>
+    <!-- 模式切换 -->
+    <div class="mode-switch" id="modeSwitch">
+        <div class="mode-btn active" data-mode="single">🌾 单作物模式</div>
+        <div class="mode-btn" data-mode="double">🌿 双作物模式</div>
+    </div>
+
+    <!-- 产量配置 -->
+    <div class="yield-settings">
+        <div style="font-size:0.8rem; font-weight:600; margin-bottom:8px;">⚙️ 地块单产配置 (产量/块)</div>
+        <div class="yield-row">
+            <div class="yield-item"><span class="yield-label">二级地·作物A</span><div class="yield-input"><input type="number" id="yieldL2A" value="30" step="1" min="0"><span>单位</span></div></div>
+            <div class="yield-item hidden" id="yieldL2BContainer"><span class="yield-label">二级地·作物B</span><div class="yield-input"><input type="number" id="yieldL2B" value="40" step="1" min="0"><span>单位</span></div></div>
+        </div>
+        <div class="yield-row" style="margin-top:8px;">
+            <div class="yield-item"><span class="yield-label">一级地·作物A</span><div class="yield-input"><input type="number" id="yieldL1A" value="20" step="1" min="0"><span>单位</span></div></div>
+            <div class="yield-item hidden" id="yieldL1BContainer"><span class="yield-label">一级地·作物B</span><div class="yield-input"><input type="number" id="yieldL1B" value="30" step="1" min="0"><span>单位</span></div></div>
         </div>
     </div>
 
-    <!-- 地块总数提示 -->
-    <div class="info-badge">
-        <span>🌍 总地块固定: <strong>24块</strong></span>
-        <span>⚡ 二级地(产量30) + 一级地(产量20)</span>
+    <!-- 单价区域 -->
+    <div class="price-area" id="priceArea">
+        <div class="price-item" id="priceAItem"><div class="price-label">🌾 作物A单价</div><div class="price-input"><input type="number" id="cropAPrice" value="1.00" step="0.1" min="0"><span>元/单位</span></div></div>
+        <div class="price-item hidden" id="priceBItem"><div class="price-label">🍠 作物B单价</div><div class="price-input"><input type="number" id="cropBPrice" value="1.20" step="0.1" min="0"><span>元/单位</span></div></div>
     </div>
+
+    <div class="info-badge"><span>🌍 总地块固定: <strong>24块</strong></span><span>⚡ 二级地 + 一级地</span></div>
 
     <!-- 二级地卡片 -->
-    <div class="card">
-        <div class="card-title">
-            🌿 二级地 <span>单块产量 30</span>
+    <div class="card" id="level2Card">
+        <div class="card-title">🌿 二级地 <span class="badge">可配置产量</span></div>
+        <div style="display:flex; gap:12px; margin-bottom:16px;">
+            <div style="flex:1"><div class="crop-count-input">📦 二级地块总数: <input type="number" id="level2Total" value="0" min="0" max="24" step="1"></div></div>
         </div>
-        <div class="sub">输入二级地数量 → 自动计算一级地数量 (24 - 二级地块数)</div>
-        <div class="input-row">
-            <div class="input-label">📦 二级地块数量</div>
-            <div class="input-number-group">
-                <input type="number" id="level2Count" value="0" min="0" max="24" step="1">
-            </div>
-        </div>
-        <div class="var-grid">
-            <div style="font-size:0.8rem; color:#5c764f; margin-bottom: 10px;">✏️ 有变异的数量 (不含无变异)</div>
-            <div id="level2VarContainer"></div>
-        </div>
-        <div class="stat-light" id="level2Summary">无变异地块数量: 自动计算</div>
+        <div id="level2CropContainer"></div>
+        <div class="stat-light" id="level2TotalCheck">📊 二级地合计验证</div>
     </div>
 
     <!-- 一级地卡片 -->
-    <div class="card">
-        <div class="card-title">
-            🌱 一级地 <span>单块产量 20</span>
-        </div>
-        <div class="sub" id="level1SubInfo">一级地数量 = 24 - 二级地块数</div>
-        <div class="auto-value" id="level1CountDisplay">🌾 一级地块数量: 0 块</div>
-        <div class="var-grid">
-            <div style="font-size:0.8rem; color:#5c764f; margin-bottom: 10px;">✏️ 有变异的数量 (不含无变异)</div>
-            <div id="level1VarContainer"></div>
-        </div>
-        <div class="stat-light" id="level1Summary">无变异地块数量: 自动计算</div>
+    <div class="card" id="level1Card">
+        <div class="card-title">🌱 一级地 <span class="badge">可配置产量</span></div>
+        <div class="sub" id="level1SubInfo">一级地总数 = 24 - 二级地块数</div>
+        <div class="auto-value" id="level1TotalDisplay" style="background:#eef1ea; padding:8px; border-radius:28px; margin-bottom:12px;"></div>
+        <div id="level1CropContainer"></div>
+        <div class="stat-light" id="level1TotalCheck">🌿 一级地合计验证</div>
     </div>
 
-    <!-- 产值结果 + 百分比换算区域 -->
+    <!-- 结果区 -->
     <div class="result-box">
-        <div class="total-label">🌾 总产价值 (产值 = Σ(地块产量×单价×变异倍数))</div>
+        <div class="total-label">💰 总产价值</div>
         <div class="total-value" id="totalValueDisplay">0.00</div>
-        
-        <!-- 新增百分比换算模块 -->
         <div class="percent-area">
-            <div class="percent-label">
-                📊 百分比换算
-            </div>
-            <div class="percent-input-group">
-                <input type="number" id="percentInput" value="10" step="1" min="0" max="10000" placeholder="百分比">
-                <span class="percent-unit">%</span>
-            </div>
-            <div class="percent-result" id="percentResultDisplay">
-                0.00 元
-            </div>
+            <span style="color:#f2f9eb;">📊 百分比换算</span>
+            <div style="background:#f9fef2; border-radius:48px; padding:0 12px;"><input type="number" id="percentInput" value="10" step="1" min="0" style="width:80px; background:transparent; border:none; text-align:right;"> <span>%</span></div>
+            <div class="percent-result" id="percentResultDisplay">0.00 元</div>
         </div>
-        <div class="detail-info" id="detailInfo">
-            💡 填写二级地块数以及各变异数量，自动核算总产值；输入百分比自动计算对应份额。
-        </div>
+        <div class="detail-info" id="detailInfo">💡 单作物模式：地块总数决定种植数量，填写变异数量即可。</div>
     </div>
-
     <button class="btn-reset" id="resetBtn">⟳ 重置所有数值</button>
-    <div class="footnote">
-        * 无变异地块数量 = 总地块数(二级或一级) - 所有变异数量之和。倍率: 无变异=1.0，变异按对应倍数。<br>
-        ** 百分比换算基于当前总产价值计算（例如输入 15% 则显示总产值的 15% 金额）。
-    </div>
+    <div class="footnote">* 单作物模式：种植数量 = 地块总数，无变异数量自动计算。双作物模式：可分别设置两种作物的种植数量。</div>
 </div>
 
 <script>
     (function() {
-        // ---------- 固定参数 ----------
         const TOTAL_PLOTS = 24;
-        const YIELD_LEVEL2 = 30;
-        const YIELD_LEVEL1 = 20;
-
-        // 变异配置 (有倍率的，无变异单独自动计算)
-        const variantsWithMul = [
-            { label: "1.5倍变异", multiplier: 1.5, key: "v1_5" },
-            { label: "2.5倍变异", multiplier: 2.5, key: "v2_5" },
-            { label: "3.75倍变异", multiplier: 3.75, key: "v3_75" },
-            { label: "8倍变异", multiplier: 8.0, key: "v8" },
-            { label: "12倍变异", multiplier: 12.0, key: "v12" },
-            { label: "20倍变异", multiplier: 20.0, key: "v20" }
+        const variants = [
+            { label: "1.5倍", mult: 1.5, key: "v1_5" },
+            { label: "2.5倍", mult: 2.5, key: "v2_5" },
+            { label: "3.75倍", mult: 3.75, key: "v3_75" },
+            { label: "8倍", mult: 8, key: "v8" },
+            { label: "12倍", mult: 12, key: "v12" },
+            { label: "20倍", mult: 20, key: "v20" }
         ];
 
+        let currentMode = "single";
+
         // DOM 元素
-        const basePriceInput = document.getElementById('basePrice');
-        const level2CountInput = document.getElementById('level2Count');
-        const level1CountDisplay = document.getElementById('level1CountDisplay');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const yieldL2A = document.getElementById('yieldL2A');
+        const yieldL2B = document.getElementById('yieldL2B');
+        const yieldL1A = document.getElementById('yieldL1A');
+        const yieldL1B = document.getElementById('yieldL1B');
+        const priceA = document.getElementById('cropAPrice');
+        const priceB = document.getElementById('cropBPrice');
+        const level2TotalInp = document.getElementById('level2Total');
         const level1SubInfo = document.getElementById('level1SubInfo');
-        const totalValueSpan = document.getElementById('totalValueDisplay');
-        const detailInfoDiv = document.getElementById('detailInfo');
+        const level1TotalDisplay = document.getElementById('level1TotalDisplay');
+        const totalSpan = document.getElementById('totalValueDisplay');
+        const detailSpan = document.getElementById('detailInfo');
+        const percentInp = document.getElementById('percentInput');
+        const percentRes = document.getElementById('percentResultDisplay');
         const resetBtn = document.getElementById('resetBtn');
-        const level2SummarySpan = document.getElementById('level2Summary');
-        const level1SummarySpan = document.getElementById('level1Summary');
-        
-        // 百分比相关元素
-        const percentInput = document.getElementById('percentInput');
-        const percentResultDisplay = document.getElementById('percentResultDisplay');
+        const level2TotalCheck = document.getElementById('level2TotalCheck');
+        const level1TotalCheck = document.getElementById('level1TotalCheck');
+        const priceBItem = document.getElementById('priceBItem');
+        const yieldL2BContainer = document.getElementById('yieldL2BContainer');
+        const yieldL1BContainer = document.getElementById('yieldL1BContainer');
+        const level2CropContainer = document.getElementById('level2CropContainer');
+        const level1CropContainer = document.getElementById('level1CropContainer');
 
         // 存储变异输入框引用
-        const variantRefs = {
-            level2: {},
-            level1: {}
-        };
+        const varRefs = { level2: { single: {}, doubleA: {}, doubleB: {} }, level1: { single: {}, doubleA: {}, doubleB: {} } };
+        // 存储双作物模式下的种植数量输入框引用
+        let level2CropAInput = null, level2CropBInput = null, level1CropAInput = null, level1CropBInput = null;
 
-        // 当前总产价值（实时缓存，用于百分比计算）
-        let currentTotalValue = 0;
-
-        // ---------- 动态构建变异输入框 ----------
-        function buildVariantInputs(containerId, levelType) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            container.innerHTML = '';
-            variantsWithMul.forEach(config => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'var-item';
-                const nameSpan = document.createElement('div');
-                nameSpan.className = 'var-name';
-                nameSpan.innerText = config.label;
-                const inputWrap = document.createElement('div');
-                inputWrap.className = 'var-input';
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.value = '0';
-                input.min = '0';
-                input.step = '1';
-                input.placeholder = '数量';
-                input.addEventListener('input', () => sanitizeAndCompute());
-                input.addEventListener('blur', () => {
-                    let v = parseInt(input.value, 10);
-                    if (isNaN(v) || v < 0) input.value = 0;
-                    sanitizeAndCompute();
-                });
-                inputWrap.appendChild(input);
-                itemDiv.appendChild(nameSpan);
-                itemDiv.appendChild(inputWrap);
-                container.appendChild(itemDiv);
-                variantRefs[levelType][config.key] = input;
-            });
-        }
-
-        // 获取某个级别的变异数量及总和
-        function getVariantCounts(levelType) {
-            let counts = {};
-            let totalVarCount = 0;
-            for (let config of variantsWithMul) {
-                let key = config.key;
-                let inputEl = variantRefs[levelType][key];
-                let val = inputEl ? (parseInt(inputEl.value, 10) || 0) : 0;
-                if (val < 0) val = 0;
-                if (inputEl && inputEl.value != val) inputEl.value = val;
-                counts[key] = val;
-                totalVarCount += val;
-            }
-            return { counts, totalVar: totalVarCount };
-        }
-
-        // 获取二级地块数量 (0-24)
-        function getLevel2Count() {
-            let val = parseInt(level2CountInput.value, 10);
-            if (isNaN(val)) val = 0;
-            if (val < 0) val = 0;
-            if (val > TOTAL_PLOTS) val = TOTAL_PLOTS;
-            if (level2CountInput.value != val) level2CountInput.value = val;
-            return val;
-        }
-
-        function getLevel1Count() {
-            return TOTAL_PLOTS - getLevel2Count();
-        }
-
-        function updateLevel1Display() {
-            const level1Count = getLevel1Count();
-            level1CountDisplay.innerText = `🌾 一级地块数量: ${level1Count} 块 (产量20/块)`;
-            level1SubInfo.innerText = `一级地数量 = 24 - 二级地块数 (当前 ${level1Count}块)`;
-        }
-
-        // 计算产值并更新全局缓存 + 百分比显示
-        function computeTotal() {
-            // 基础单价
-            let basePrice = parseFloat(basePriceInput.value);
-            if (isNaN(basePrice) || basePrice < 0) basePrice = 0;
-            basePriceInput.value = basePrice;
-
-            const level2Total = getLevel2Count();
-            const level1Total = getLevel1Count();
-            updateLevel1Display();
-
-            // 获取变异数据
-            const level2VarData = getVariantCounts('level2');
-            const level1VarData = getVariantCounts('level1');
-
-            // 计算无变异地块数量 (自动推导)
-            let level2None = level2Total - level2VarData.totalVar;
-            let level1None = level1Total - level1VarData.totalVar;
-            let warnings = [];
-
-            if (level2None < 0) {
-                warnings.push(`❗ 二级地变异总数 ${level2VarData.totalVar} 超过地块数 ${level2Total}，无变异按0计，请减少变异数量。`);
-                level2None = 0;
-            }
-            if (level1None < 0) {
-                warnings.push(`❗ 一级地变异总数 ${level1VarData.totalVar} 超过地块数 ${level1Total}，无变异按0计，请减少变异数量。`);
-                level1None = 0;
-            }
-
-            // 更新统计摘要
-            level2SummarySpan.innerText = `📊 二级地: 无变异 ${level2None} 块 | 有变异 ${level2VarData.totalVar} 块 (合计 ${level2Total})`;
-            level1SummarySpan.innerText = `📊 一级地: 无变异 ${level1None} 块 | 有变异 ${level1VarData.totalVar} 块 (合计 ${level1Total})`;
-
-            // 倍数映射
-            const multiplierMap = {};
-            variantsWithMul.forEach(cfg => { multiplierMap[cfg.key] = cfg.multiplier; });
-
-            // 二级地产值 (变异部分 + 无变异部分)
-            let level2Value = 0;
-            for (let cfg of variantsWithMul) {
-                let cnt = level2VarData.counts[cfg.key] || 0;
-                if (cnt > 0) {
-                    level2Value += cnt * YIELD_LEVEL2 * basePrice * cfg.multiplier;
-                }
-            }
-            if (level2None > 0) {
-                level2Value += level2None * YIELD_LEVEL2 * basePrice * 1.0;
-            }
-
-            // 一级地产值
-            let level1Value = 0;
-            for (let cfg of variantsWithMul) {
-                let cnt = level1VarData.counts[cfg.key] || 0;
-                if (cnt > 0) {
-                    level1Value += cnt * YIELD_LEVEL1 * basePrice * cfg.multiplier;
-                }
-            }
-            if (level1None > 0) {
-                level1Value += level1None * YIELD_LEVEL1 * basePrice * 1.0;
-            }
-
-            const grandTotal = level2Value + level1Value;
-            currentTotalValue = grandTotal;
-            totalValueSpan.innerText = grandTotal.toFixed(2);
-
-            // 详细信息
-            let detailMsg = `💰 二级地产值: ${level2Value.toFixed(2)} 元 (含无变异${level2None}块)  |  一级地产值: ${level1Value.toFixed(2)} 元 (含无变异${level1None}块)`;
-            if (warnings.length > 0) {
-                detailMsg = warnings.join(' ') + '\n' + detailMsg;
-            }
-            detailInfoDiv.innerText = detailMsg;
-
-            // 每当总产价值变化，重新计算百分比结果
-            updatePercentResult();
-        }
-
-        // 百分比换算核心：根据当前总产价值 * 百分比/100
-        function updatePercentResult() {
-            let percentVal = parseFloat(percentInput.value);
-            if (isNaN(percentVal)) percentVal = 0;
-            // 允许负数的话显示为0，但是限制最小值0避免歧义, 但最大值不设限, 不过界处理
-            if (percentVal < 0) percentVal = 0;
-            if (percentInput.value != percentVal) percentInput.value = percentVal;
+        // 通用：创建变异网格（3列布局）
+        function createVarGrid(container, level, type) {
+            const grid = document.createElement('div');
+            grid.className = 'var-grid';
             
-            const resultValue = currentTotalValue * (percentVal / 100);
-            // 保留两位小数显示
-            percentResultDisplay.innerText = resultValue.toFixed(2) + " 元";
+            // 按顺序创建6个变异输入框，自动形成3列2行
+            variants.forEach(v => {
+                const item = document.createElement('div');
+                item.className = 'var-item';
+                item.innerHTML = `<span class="var-name">${v.label}</span><div class="var-input"><input type="number" value="0" min="0" step="1"></div>`;
+                const inp = item.querySelector('input');
+                inp.addEventListener('input', () => fullCompute());
+                inp.addEventListener('blur', () => { 
+                    let val = parseInt(inp.value, 10);
+                    if (isNaN(val) || val < 0) val = 0;
+                    inp.value = val;
+                    fullCompute();
+                });
+                grid.appendChild(item);
+                // 存储引用
+                if (!varRefs[level][type]) varRefs[level][type] = {};
+                varRefs[level][type][v.key] = inp;
+            });
+            container.appendChild(grid);
         }
 
-        // 统一清理输入并重新计算产值，百分比联动
-        function sanitizeAndCompute() {
-            // 对变异输入做基础清理
-            const level2Total = getLevel2Count();
-            const level1Total = getLevel1Count();
-            // 清理二级变异数值
-            for (let cfg of variantsWithMul) {
-                let inp = variantRefs.level2[cfg.key];
-                if (inp) {
-                    let v = parseInt(inp.value, 10);
-                    if (isNaN(v) || v < 0) v = 0;
-                    if (inp.value != v) inp.value = v;
-                }
-                let inp1 = variantRefs.level1[cfg.key];
-                if (inp1) {
-                    let v = parseInt(inp1.value, 10);
-                    if (isNaN(v) || v < 0) v = 0;
-                    if (inp1.value != v) inp1.value = v;
-                }
+        // 构建单作物模式的UI
+        function buildSingleCropUI(level, containerId) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'info-text';
+            infoDiv.innerText = `📌 单作物模式：种植数量 = 地块总数，无需单独设置`;
+            container.appendChild(infoDiv);
+            
+            const varDiv = document.createElement('div');
+            varDiv.className = 'crop-section';
+            const header = document.createElement('div');
+            header.className = 'crop-header';
+            header.innerHTML = `<span class="crop-badge-a">🌾 作物A</span><span style="font-size:0.75rem; color:#5c764f;">变异数量（发生在这个等级的地块上）</span>`;
+            varDiv.appendChild(header);
+            container.appendChild(varDiv);
+            
+            createVarGrid(varDiv, level, 'single');
+            
+            const summary = document.createElement('div');
+            summary.className = 'stat-light';
+            summary.id = `${level}Summary`;
+            container.appendChild(summary);
+        }
+        
+        // 构建双作物模式的UI（变异网格3列布局）
+        function buildDoubleCropUI(level, containerId, totalPlots) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            container.innerHTML = '';
+            
+            // 作物A区域
+            const cropADiv = document.createElement('div');
+            cropADiv.className = 'crop-section';
+            cropADiv.innerHTML = `<div class="crop-header"><span class="crop-badge-a">🌾 作物A</span><div class="crop-count-input">种植数量: <input type="number" id="${level}CropA" value="${totalPlots}" min="0" step="1"></div></div>`;
+            const varAGridContainer = document.createElement('div');
+            cropADiv.appendChild(varAGridContainer);
+            container.appendChild(cropADiv);
+            
+            // 作物B区域
+            const cropBDiv = document.createElement('div');
+            cropBDiv.className = 'crop-section';
+            cropBDiv.innerHTML = `<div class="crop-header"><span class="crop-badge-b">🍠 作物B</span><div class="crop-count-input">种植数量: <input type="number" id="${level}CropB" value="0" min="0" step="1"></div></div>`;
+            const varBGridContainer = document.createElement('div');
+            cropBDiv.appendChild(varBGridContainer);
+            container.appendChild(cropBDiv);
+            
+            // 创建变异网格（3列布局）
+            createVarGrid(varAGridContainer, level, 'doubleA');
+            createVarGrid(varBGridContainer, level, 'doubleB');
+            
+            // 存储引用
+            const aInput = document.getElementById(`${level}CropA`);
+            const bInput = document.getElementById(`${level}CropB`);
+            if(level === 'level2') {
+                level2CropAInput = aInput;
+                level2CropBInput = bInput;
+            } else {
+                level1CropAInput = aInput;
+                level1CropBInput = bInput;
             }
-            computeTotal();  // 内部会调用 updatePercentResult
+            
+            // 配平逻辑
+            const setupBalance = () => {
+                const total = (level === 'level2') ? getLevel2Total() : getLevel1Total();
+                const newAHandler = () => {
+                    let aVal = parseInt(aInput.value,10);
+                    if(isNaN(aVal)) aVal = 0;
+                    if(aVal < 0) aVal = 0;
+                    if(aVal > total) aVal = total;
+                    aInput.value = aVal;
+                    bInput.value = total - aVal;
+                    fullCompute();
+                };
+                const newBHandler = () => {
+                    let bVal = parseInt(bInput.value,10);
+                    if(isNaN(bVal)) bVal = 0;
+                    if(bVal < 0) bVal = 0;
+                    if(bVal > total) bVal = total;
+                    bInput.value = bVal;
+                    aInput.value = total - bVal;
+                    fullCompute();
+                };
+                if(aInput._handler) aInput.removeEventListener('input', aInput._handler);
+                if(bInput._handler) bInput.removeEventListener('input', bInput._handler);
+                aInput._handler = newAHandler;
+                bInput._handler = newBHandler;
+                aInput.addEventListener('input', newAHandler);
+                bInput.addEventListener('input', newBHandler);
+            };
+            setupBalance();
+            
+            // 摘要区域
+            const sumADiv = document.createElement('div');
+            sumADiv.className = 'stat-light';
+            sumADiv.id = `${level}SummaryA`;
+            const sumBDiv = document.createElement('div');
+            sumBDiv.className = 'stat-light';
+            sumBDiv.id = `${level}SummaryB`;
+            container.appendChild(sumADiv);
+            container.appendChild(sumBDiv);
         }
 
-        // 百分比单独监听（不触发地块重新计算，但需要基于最新总产值）
-        function bindPercentEvents() {
-            percentInput.addEventListener('input', () => {
-                let v = parseFloat(percentInput.value);
-                if (isNaN(v)) percentInput.value = '0';
-                else if (v < 0) percentInput.value = '0';
-                updatePercentResult();
-            });
-            percentInput.addEventListener('blur', () => {
-                let v = parseFloat(percentInput.value);
-                if (isNaN(v)) percentInput.value = '0';
-                else if (v < 0) percentInput.value = '0';
-                updatePercentResult();
-            });
+        function getVarCountsSingle(level) {
+            let total = 0, counts = {};
+            const type = 'single';
+            for(let v of variants) {
+                let inp = varRefs[level][type]?.[v.key];
+                let val = inp ? (parseInt(inp.value,10)||0) : 0;
+                if(val<0) val=0;
+                if(inp && inp.value!=val) inp.value=val;
+                counts[v.key] = val;
+                total += val;
+            }
+            return { counts, totalVar: total };
+        }
+        
+        function getVarCountsDouble(level, crop) {
+            let total = 0, counts = {};
+            const type = crop === 'A' ? 'doubleA' : 'doubleB';
+            for(let v of variants) {
+                let inp = varRefs[level][type]?.[v.key];
+                let val = inp ? (parseInt(inp.value,10)||0) : 0;
+                if(val<0) val=0;
+                if(inp && inp.value!=val) inp.value=val;
+                counts[v.key] = val;
+                total += val;
+            }
+            return { counts, totalVar: total };
         }
 
-        // 重置所有
+        function getLevel2Total() {
+            let v = parseInt(level2TotalInp.value,10);
+            if(isNaN(v)||v<0) v=0;
+            if(v>TOTAL_PLOTS) v=TOTAL_PLOTS;
+            if(level2TotalInp.value!=v) level2TotalInp.value=v;
+            return v;
+        }
+
+        function getLevel1Total() { return TOTAL_PLOTS - getLevel2Total(); }
+
+        function updateLevel1Info() {
+            let l1total = getLevel1Total();
+            level1TotalDisplay.innerText = `🌾 一级地块总数: ${l1total} 块`;
+            level1SubInfo.innerText = `一级地总数 = 24 - ${getLevel2Total()} = ${l1total}`;
+        }
+
+        function computeCropValue(yieldPerUnit, plantCount, varData, price) {
+            let noneCount = plantCount - varData.totalVar;
+            if(noneCount<0) noneCount = 0;
+            let value = 0;
+            for(let v of variants) {
+                let cnt = varData.counts[v.key] || 0;
+                if(cnt>0) value += cnt * yieldPerUnit * price * v.mult;
+            }
+            if(noneCount>0) value += noneCount * yieldPerUnit * price;
+            return { value, noneCount };
+        }
+
+        function fullCompute() {
+            let pA = parseFloat(priceA.value); if(isNaN(pA)||pA<0) pA=0; priceA.value = pA;
+            
+            let yL2A = parseFloat(yieldL2A.value); if(isNaN(yL2A)||yL2A<0) yL2A=0;
+            let yL1A = parseFloat(yieldL1A.value); if(isNaN(yL1A)||yL1A<0) yL1A=0;
+            yieldL2A.value = yL2A;
+            yieldL1A.value = yL1A;
+            
+            let l2total = getLevel2Total();
+            let l1total = getLevel1Total();
+            updateLevel1Info();
+            
+            let total = 0;
+            
+            if(currentMode === 'single') {
+                let l2Plant = l2total;
+                let l1Plant = l1total;
+                
+                let l2Var = getVarCountsSingle('level2');
+                let l1Var = getVarCountsSingle('level1');
+                
+                let l2Res = computeCropValue(yL2A, l2Plant, l2Var, pA);
+                let l1Res = computeCropValue(yL1A, l1Plant, l1Var, pA);
+                total = l2Res.value + l1Res.value;
+                
+                level2TotalCheck.innerText = `✅ 二级地 ${l2total}块，种植${l2Plant}块作物A | 变异${l2Var.totalVar}块 | 无变异${l2Res.noneCount}块`;
+                level1TotalCheck.innerText = `✅ 一级地 ${l1total}块，种植${l1Plant}块作物A | 变异${l1Var.totalVar}块 | 无变异${l1Res.noneCount}块`;
+                
+                let sumL2 = document.getElementById('level2Summary');
+                if(sumL2) sumL2.innerText = `🌾 二级地作物A: 产值 ${l2Res.value.toFixed(2)} 元`;
+                let sumL1 = document.getElementById('level1Summary');
+                if(sumL1) sumL1.innerText = `🌾 一级地作物A: 产值 ${l1Res.value.toFixed(2)} 元`;
+                
+                detailSpan.innerText = `二级地产值: ${l2Res.value.toFixed(2)}元 | 一级地产值: ${l1Res.value.toFixed(2)}元`;
+                
+            } else {
+                let pB = parseFloat(priceB.value); if(isNaN(pB)||pB<0) pB=0; priceB.value = pB;
+                let yL2B = parseFloat(yieldL2B.value); if(isNaN(yL2B)||yL2B<0) yL2B=0;
+                let yL1B = parseFloat(yieldL1B.value); if(isNaN(yL1B)||yL1B<0) yL1B=0;
+                yieldL2B.value = yL2B;
+                yieldL1B.value = yL1B;
+                
+                let l2aPlant = level2CropAInput ? (parseInt(level2CropAInput.value,10)||0) : 0;
+                let l2bPlant = level2CropBInput ? (parseInt(level2CropBInput.value,10)||0) : 0;
+                let l1aPlant = level1CropAInput ? (parseInt(level1CropAInput.value,10)||0) : 0;
+                let l1bPlant = level1CropBInput ? (parseInt(level1CropBInput.value,10)||0) : 0;
+                
+                if(l2aPlant + l2bPlant !== l2total && l2total>0) {
+                    let newB = l2total - l2aPlant;
+                    if(newB<0) newB=0;
+                    if(level2CropBInput) level2CropBInput.value = newB;
+                    l2bPlant = newB;
+                }
+                if(l1aPlant + l1bPlant !== l1total && l1total>0) {
+                    let newB = l1total - l1aPlant;
+                    if(newB<0) newB=0;
+                    if(level1CropBInput) level1CropBInput.value = newB;
+                    l1bPlant = newB;
+                }
+                
+                level2TotalCheck.innerText = `✅ 二级地 ${l2total} = A${l2aPlant} + B${l2bPlant}`;
+                level1TotalCheck.innerText = `✅ 一级地 ${l1total} = A${l1aPlant} + B${l1bPlant}`;
+                
+                let l2VarA = getVarCountsDouble('level2', 'A');
+                let l2VarB = getVarCountsDouble('level2', 'B');
+                let l1VarA = getVarCountsDouble('level1', 'A');
+                let l1VarB = getVarCountsDouble('level1', 'B');
+                
+                let l2ARes = computeCropValue(yL2A, l2aPlant, l2VarA, pA);
+                let l2BRes = computeCropValue(yL2B, l2bPlant, l2VarB, pB);
+                let l1ARes = computeCropValue(yL1A, l1aPlant, l1VarA, pA);
+                let l1BRes = computeCropValue(yL1B, l1bPlant, l1VarB, pB);
+                
+                total = l2ARes.value + l2BRes.value + l1ARes.value + l1BRes.value;
+                
+                let sumA2 = document.getElementById('level2SummaryA');
+                if(sumA2) sumA2.innerText = `🌾 作物A: 种植${l2aPlant}块 | 变异${l2VarA.totalVar} | 无变异${l2ARes.noneCount} | 产值${l2ARes.value.toFixed(2)}元`;
+                let sumB2 = document.getElementById('level2SummaryB');
+                if(sumB2) sumB2.innerText = `🍠 作物B: 种植${l2bPlant}块 | 变异${l2VarB.totalVar} | 无变异${l2BRes.noneCount} | 产值${l2BRes.value.toFixed(2)}元`;
+                let sumA1 = document.getElementById('level1SummaryA');
+                if(sumA1) sumA1.innerText = `🌾 作物A: 种植${l1aPlant}块 | 变异${l1VarA.totalVar} | 无变异${l1ARes.noneCount} | 产值${l1ARes.value.toFixed(2)}元`;
+                let sumB1 = document.getElementById('level1SummaryB');
+                if(sumB1) sumB1.innerText = `🍠 作物B: 种植${l1bPlant}块 | 变异${l1VarB.totalVar} | 无变异${l1BRes.noneCount} | 产值${l1BRes.value.toFixed(2)}元`;
+                
+                detailSpan.innerText = `二级地 A:${l2ARes.value.toFixed(2)} B:${l2BRes.value.toFixed(2)} | 一级地 A:${l1ARes.value.toFixed(2)} B:${l1BRes.value.toFixed(2)}`;
+            }
+            
+            totalSpan.innerText = total.toFixed(2);
+            let pct = parseFloat(percentInp.value); if(isNaN(pct)||pct<0) pct=0; percentInp.value = pct;
+            percentRes.innerText = (total * pct / 100).toFixed(2) + " 元";
+        }
+
+        function rebuildUIBasedOnMode() {
+            const isDouble = (currentMode === 'double');
+            
+            priceBItem.classList.toggle('hidden', !isDouble);
+            yieldL2BContainer.classList.toggle('hidden', !isDouble);
+            yieldL1BContainer.classList.toggle('hidden', !isDouble);
+            
+            if(isDouble) {
+                buildDoubleCropUI('level2', 'level2CropContainer', getLevel2Total());
+                buildDoubleCropUI('level1', 'level1CropContainer', getLevel1Total());
+            } else {
+                buildSingleCropUI('level2', 'level2CropContainer');
+                buildSingleCropUI('level1', 'level1CropContainer');
+            }
+            
+            const handleLevel2TotalChange = () => {
+                let newTotal = getLevel2Total();
+                let newL1Total = getLevel1Total();
+                if(currentMode === 'double') {
+                    if(level2CropAInput && level2CropBInput) {
+                        level2CropAInput.value = newTotal;
+                        level2CropBInput.value = 0;
+                        const aInp = level2CropAInput, bInp = level2CropBInput;
+                        const total = newTotal;
+                        const newAHandler = () => {
+                            let aVal = parseInt(aInp.value,10);
+                            if(isNaN(aVal)) aVal = 0;
+                            if(aVal < 0) aVal = 0;
+                            if(aVal > total) aVal = total;
+                            aInp.value = aVal;
+                            bInp.value = total - aVal;
+                            fullCompute();
+                        };
+                        const newBHandler = () => {
+                            let bVal = parseInt(bInp.value,10);
+                            if(isNaN(bVal)) bVal = 0;
+                            if(bVal < 0) bVal = 0;
+                            if(bVal > total) bVal = total;
+                            bInp.value = bVal;
+                            aInp.value = total - bVal;
+                            fullCompute();
+                        };
+                        if(aInp._handler) aInp.removeEventListener('input', aInp._handler);
+                        if(bInp._handler) bInp.removeEventListener('input', bInp._handler);
+                        aInp._handler = newAHandler;
+                        bInp._handler = newBHandler;
+                        aInp.addEventListener('input', newAHandler);
+                        bInp.addEventListener('input', newBHandler);
+                    }
+                    if(level1CropAInput && level1CropBInput) {
+                        level1CropAInput.value = newL1Total;
+                        level1CropBInput.value = 0;
+                        const aInp = level1CropAInput, bInp = level1CropBInput;
+                        const total = newL1Total;
+                        const newAHandler = () => {
+                            let aVal = parseInt(aInp.value,10);
+                            if(isNaN(aVal)) aVal = 0;
+                            if(aVal < 0) aVal = 0;
+                            if(aVal > total) aVal = total;
+                            aInp.value = aVal;
+                            bInp.value = total - aVal;
+                            fullCompute();
+                        };
+                        const newBHandler = () => {
+                            let bVal = parseInt(bInp.value,10);
+                            if(isNaN(bVal)) bVal = 0;
+                            if(bVal < 0) bVal = 0;
+                            if(bVal > total) bVal = total;
+                            bInp.value = bVal;
+                            aInp.value = total - bVal;
+                            fullCompute();
+                        };
+                        if(aInp._handler) aInp.removeEventListener('input', aInp._handler);
+                        if(bInp._handler) bInp.removeEventListener('input', bInp._handler);
+                        aInp._handler = newAHandler;
+                        bInp._handler = newBHandler;
+                        aInp.addEventListener('input', newAHandler);
+                        bInp.addEventListener('input', newBHandler);
+                    }
+                }
+                fullCompute();
+            };
+            
+            level2TotalInp.removeEventListener('input', level2TotalInp._handler);
+            level2TotalInp._handler = handleLevel2TotalChange;
+            level2TotalInp.addEventListener('input', handleLevel2TotalChange);
+            
+            fullCompute();
+        }
+
         function resetAll() {
-            basePriceInput.value = '1.00';
-            level2CountInput.value = '0';
-            // 重置所有变异输入
-            for (let cfg of variantsWithMul) {
-                if (variantRefs.level2[cfg.key]) variantRefs.level2[cfg.key].value = '0';
-                if (variantRefs.level1[cfg.key]) variantRefs.level1[cfg.key].value = '0';
+            priceA.value = '1.00';
+            priceB.value = '1.20';
+            yieldL2A.value = '30';
+            yieldL2B.value = '40';
+            yieldL1A.value = '20';
+            yieldL1B.value = '30';
+            level2TotalInp.value = '0';
+            percentInp.value = '10';
+            
+            // 重置变异输入
+            for(let l of ['level2', 'level1']) {
+                if(currentMode === 'single') {
+                    const type = 'single';
+                    if(varRefs[l][type]) {
+                        for(let v of variants) {
+                            if(varRefs[l][type][v.key]) varRefs[l][type][v.key].value = '0';
+                        }
+                    }
+                } else {
+                    for(let type of ['doubleA', 'doubleB']) {
+                        if(varRefs[l][type]) {
+                            for(let v of variants) {
+                                if(varRefs[l][type][v.key]) varRefs[l][type][v.key].value = '0';
+                            }
+                        }
+                    }
+                }
             }
-            // 重置百分比为默认40%
-            percentInput.value = '40';
-            sanitizeAndCompute();
+            
+            if(currentMode === 'double') {
+                if(level2CropAInput) level2CropAInput.value = getLevel2Total();
+                if(level2CropBInput) level2CropBInput.value = 0;
+                if(level1CropAInput) level1CropAInput.value = getLevel1Total();
+                if(level1CropBInput) level1CropBInput.value = 0;
+            }
+            
+            fullCompute();
         }
 
-        // 绑定主要事件
-        function bindEvents() {
-            basePriceInput.addEventListener('input', () => sanitizeAndCompute());
-            level2CountInput.addEventListener('input', () => {
-                let v = parseInt(level2CountInput.value, 10);
-                if (isNaN(v)) v = 0;
-                if (v > TOTAL_PLOTS) v = TOTAL_PLOTS;
-                if (v < 0) v = 0;
-                level2CountInput.value = v;
-                sanitizeAndCompute();
-            });
+        function bindGlobalEvents() {
+            priceA.addEventListener('input', fullCompute);
+            priceB.addEventListener('input', fullCompute);
+            yieldL2A.addEventListener('input', fullCompute);
+            yieldL2B.addEventListener('input', fullCompute);
+            yieldL1A.addEventListener('input', fullCompute);
+            yieldL1B.addEventListener('input', fullCompute);
             resetBtn.addEventListener('click', resetAll);
-            bindPercentEvents();
+            percentInp.addEventListener('input', fullCompute);
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentMode = btn.getAttribute('data-mode');
+                    rebuildUIBasedOnMode();
+                });
+            });
         }
 
-        // 初始化
         function init() {
-            buildVariantInputs('level2VarContainer', 'level2');
-            buildVariantInputs('level1VarContainer', 'level1');
-            bindEvents();
-            updateLevel1Display();
-            sanitizeAndCompute();
+            bindGlobalEvents();
+            rebuildUIBasedOnMode();
         }
-
         init();
     })();
 </script>
